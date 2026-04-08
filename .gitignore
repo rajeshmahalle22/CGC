@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.env
+*.xlsx
+!cgc_dashboard/config/*.json
+.claude/
+venv/
+.venv/
