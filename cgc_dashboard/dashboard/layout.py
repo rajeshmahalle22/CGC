@@ -1,4 +1,8 @@
-"""Full page layout for the CGC dashboard."""
+"""Full page layout for the CGC dashboard.
+
+IMPORTANT: Always renders MAX_STAGES stage panels (some hidden) so that
+all callback Output IDs exist in the DOM regardless of current stage count.
+"""
 
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -10,6 +14,17 @@ MAX_STAGES = 6
 
 
 def build_layout(num_stages: int = 4):
+    # Build ALL stage accordion items — hide extras via display:none wrapper
+    all_stage_items = []
+    for i in range(MAX_STAGES):
+        visible = i < num_stages
+        item = html.Div(
+            stage_accordion_item(i, MAX_STAGES),
+            id=f"stage-wrapper-{i}",
+            style={"display": "block"} if visible else {"display": "none"},
+        )
+        all_stage_items.append(item)
+
     return dbc.Container([
         # Hidden stores
         dcc.Store(id="calc-results-store", data=None),
@@ -94,16 +109,10 @@ def build_layout(num_stages: int = 4):
                  children=train_overview_strip(num_stages),
                  style={"marginTop": "10px"}),
 
-        # ── PER-STAGE ACCORDION ─────────────────────────────────
+        # ── PER-STAGE PANELS (all MAX_STAGES rendered, extras hidden) ──
         html.Div(
             id="stages-accordion-container",
-            children=dbc.Accordion(
-                [stage_accordion_item(i, num_stages) for i in range(num_stages)],
-                id="stages-accordion",
-                start_collapsed=True,
-                flush=True,
-                style={"backgroundColor": "#0a0a23"},
-            ),
+            children=all_stage_items,
             style={"marginTop": "10px"},
         ),
 

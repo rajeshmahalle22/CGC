@@ -88,7 +88,7 @@ def build_flash_content(flash: FlashResult, stage_idx: int):
             html.Th("K = y/x"), html.Th("V [kmol/h]"), html.Th("L [kmol/h]"),
         ], style={"color": "#ffa500"})),
         html.Tbody(comp_rows),
-    ], bordered=True, dark=True, hover=True, size="sm",
+    ], bordered=True, color="dark", hover=True, size="sm",
        style={"fontSize": "0.75rem"})
 
     # K-value bar chart

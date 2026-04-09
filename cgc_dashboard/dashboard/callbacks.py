@@ -20,8 +20,6 @@ from cgc_dashboard.dashboard.components.charts import (
     efficiency_chart, pressure_temperature_chart,
     condensate_chart, fouling_chart,
 )
-from cgc_dashboard.dashboard.components.stage_panel import stage_accordion_item
-from cgc_dashboard.dashboard.components.train_overview import train_overview_strip
 
 
 MAX_STAGES = 6
@@ -423,22 +421,40 @@ def register_callbacks(app):
 
     # ── STAGE COUNT CHANGE ──────────────────────────────────────
     @app.callback(
-        [Output("stages-accordion-container", "children"),
-         Output("train-overview-container", "children"),
-         Output("current-num-stages", "data")],
+        # Toggle visibility of stage wrappers
+        [Output(f"stage-wrapper-{i}", "style") for i in range(MAX_STAGES)]
+        # Toggle visibility of overview stage wrappers
+        + [Output(f"overview-stage-wrap-{i}", "style") for i in range(MAX_STAGES)]
+        # Toggle visibility of overview flash wrappers
+        + [Output(f"overview-flash-wrap-{i}", "style") for i in range(MAX_STAGES - 1)]
+        + [Output("current-num-stages", "data")],
         Input("num-stages-select", "value"),
         prevent_initial_call=True,
     )
     def update_stage_count(value):
         n = int(value)
-        accordion = dbc.Accordion(
-            [stage_accordion_item(i, n) for i in range(n)],
-            id="stages-accordion",
-            start_collapsed=True, flush=True,
-            style={"backgroundColor": "#0a0a23"},
-        )
-        overview = train_overview_strip(n)
-        return accordion, overview, n
+        stage_styles = []
+        for i in range(MAX_STAGES):
+            if i < n:
+                stage_styles.append({"display": "block"})
+            else:
+                stage_styles.append({"display": "none"})
+
+        overview_stage_styles = []
+        for i in range(MAX_STAGES):
+            if i < n:
+                overview_stage_styles.append({"display": "inline-flex", "alignItems": "center"})
+            else:
+                overview_stage_styles.append({"display": "none"})
+
+        overview_flash_styles = []
+        for i in range(MAX_STAGES - 1):
+            if i < n - 1:
+                overview_flash_styles.append({"display": "inline-flex", "alignItems": "center"})
+            else:
+                overview_flash_styles.append({"display": "none"})
+
+        return stage_styles + overview_stage_styles + overview_flash_styles + [n]
 
     # ── AS1 PANEL VISIBILITY ────────────────────────────────────
     for i in range(MAX_STAGES):

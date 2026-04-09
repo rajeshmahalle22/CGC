@@ -1,7 +1,13 @@
-"""Train overview strip — horizontal pipeline with live KPIs."""
+"""Train overview strip — horizontal pipeline with live KPIs.
+
+Always renders MAX_STAGES boxes so callback IDs exist. Hidden stages
+are controlled via the wrapper divs.
+"""
 
 from dash import html
 import dash_bootstrap_components as dbc
+
+MAX_STAGES = 6
 
 
 def _stage_box(idx: int):
@@ -41,20 +47,32 @@ def _flash_box(idx: int):
 
 
 def _arrow():
-    return html.Div(
-        html.Span("\u2794", style={"color": "#555", "fontSize": "1.2rem"}),
-        style={"display": "flex", "alignItems": "center", "padding": "0 6px"},
-    )
+    return html.Span("\u2794", style={"color": "#555", "fontSize": "1.2rem",
+                                       "padding": "0 6px"})
 
 
 def train_overview_strip(num_stages: int):
+    """Build the overview strip. Always includes all MAX_STAGES elements
+    with extras hidden."""
     items = []
-    for i in range(num_stages):
-        items.append(_stage_box(i))
-        if i < num_stages - 1:
-            items.append(_arrow())
-            items.append(_flash_box(i))
-            items.append(_arrow())
+    for i in range(MAX_STAGES):
+        visible = i < num_stages
+        # Stage box
+        items.append(html.Div(
+            _stage_box(i),
+            id=f"overview-stage-wrap-{i}",
+            style={"display": "inline-flex", "alignItems": "center"}
+            if visible else {"display": "none"},
+        ))
+        # Flash + arrows between stages
+        if i < MAX_STAGES - 1:
+            flash_visible = i < num_stages - 1
+            items.append(html.Div(
+                [_arrow(), _flash_box(i), _arrow()],
+                id=f"overview-flash-wrap-{i}",
+                style={"display": "inline-flex", "alignItems": "center"}
+                if flash_visible else {"display": "none"},
+            ))
 
     return html.Div(
         items,
