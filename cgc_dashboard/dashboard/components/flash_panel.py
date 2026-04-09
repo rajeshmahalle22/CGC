@@ -22,10 +22,17 @@ def build_flash_content(flash: FlashResult, stage_idx: int):
                    style={"color": "#888"}),
         ])
 
-    approx_badge = ""
+    # Method badge
+    method_badges = []
+    method_label = flash.method or "unknown"
+    if flash.method == "thermo-PR":
+        method_badges.append(dbc.Badge("THERMO PR EOS", color="success", className="mb-2 me-2"))
+    elif flash.method == "dwsim-dtl-PR":
+        method_badges.append(dbc.Badge("DWSIM DTL", color="info", className="mb-2 me-2"))
+    elif flash.method == "raoult-antoine":
+        method_badges.append(dbc.Badge("RAOULT'S LAW (Approximate)", color="warning", className="mb-2 me-2"))
     if flash.is_approximate:
-        approx_badge = dbc.Badge("APPROXIMATE (Raoult's Law)",
-                                  color="warning", className="mb-2")
+        method_badges.append(dbc.Badge("APPROXIMATE", color="warning", className="mb-2"))
 
     # Conditions card
     conditions = dbc.Card([
@@ -115,7 +122,7 @@ def build_flash_content(flash: FlashResult, stage_idx: int):
     )
 
     return html.Div([
-        approx_badge if approx_badge else html.Div(),
+        html.Div(method_badges) if method_badges else html.Div(),
         conditions,
         phase_split,
         html.H6("Composition Table", style={"color": "#4ecdc4", "marginTop": "10px"}),
